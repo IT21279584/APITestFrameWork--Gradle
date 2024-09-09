@@ -1,0 +1,57 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "array",
+  "items": {
+    "type": "object",
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[0-9]+$"
+      },
+      "url": {
+        "type": "string",
+        "format": "uri"
+      },
+      "method": {
+        "type": "string",
+        "enum": ["GET", "POST", "PUT", "DELETE", "PATCH"]
+      },
+      "payload": {
+        "type": "object"
+      },
+      "expectedResponseCode": {
+        "type": "integer",
+        "minimum": 100,
+        "maximum": 599
+      },
+      "testName": {
+        "type": "string"
+      },
+      "expectedResponseBody": {
+        "type": ["object", "null"]
+      },
+      "requiresAuthentication": {
+        "type": "boolean"
+      },
+      "authToken": {
+        "type": "string"
+      },
+      "saveResponse": {
+        "type": "object"
+      },
+      "priority": {
+        "type": "integer",
+        "minimum": 1
+      }
+    },
+    "required": [
+      "id",
+      "url",
+      "method",
+      "expectedResponseCode",
+      "testName",
+      "requiresAuthentication",
+      "priority"
+    ]
+  }
+}
