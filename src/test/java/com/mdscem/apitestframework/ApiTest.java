@@ -13,16 +13,12 @@ public class ApiTest {
 
     @Test
     public void testGetPost() {
-        // Step 1: Log the request
         logRequest("GET", "https://reqres.in/api/users/1");
 
-        // Step 2: Send GET request and log response
         Response response = executeGetRequest("https://reqres.in/api/users/1");
 
-        // Step 3: Validate and log the response status code
         validateStatusCode(response, 200);
 
-        // Step 4: Attach response body to the Allure report
         attachResponseBodyToAllure(response);
     }
 
