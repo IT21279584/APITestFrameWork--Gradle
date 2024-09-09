@@ -2,6 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '2.7.0'
 	id 'io.spring.dependency-management' version '1.1.6'
+	id 'io.qameta.allure' version '2.11.2'
 }
 
 group = 'com.mdscem'
@@ -20,6 +21,12 @@ repositories {
 ext {
 	restAssuredVersion = '4.3.3'
 	junitJupiterVersion = '5.8.2'
+	allureVersion = '2.17.3'
+}
+dependencyManagement {
+	imports {
+		mavenBom "io.qameta.allure:allure-bom:${allureVersion}"
+	}
 }
 
 
@@ -29,13 +36,24 @@ dependencies {
 	implementation 'com.fasterxml.jackson.core:jackson-databind:2.15.0'
 	implementation 'com.fasterxml.jackson.dataformat:jackson-dataformat-yaml:2.7.4'
 	implementation 'com.networknt:json-schema-validator:1.0.82'
+	implementation 'junit:junit:4.13.1'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
+//	testImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
 	testImplementation 'org.testng:testng:7.4.0'
 	testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}"
 	testImplementation "org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}"
 
+
+	testImplementation 'io.qameta.allure:allure-testng:2.17.3'
+	implementation 'io.qameta.allure:allure-java-commons:2.17.3'
+	implementation 'io.qameta.allure:allure-testng:2.17.3'
+	implementation "io.rest-assured:rest-assured:${restAssuredVersion}"
+	implementation 'org.skyscreamer:jsonassert:1.5.1'
+
+	testImplementation 'io.qameta.allure:allure-rest-assured:2.15.0'
+	testImplementation 'io.qameta.allure:allure-junit4:2.15.0'
+	testImplementation 'io.qameta.allure:allure-testng:2.21.0'
 
 }
 
@@ -43,5 +61,16 @@ tasks.named('test') {
 	useTestNG()
 	useJUnitPlatform()
 	systemProperty 'surefire.testng.configs', 'testng.xml'
+}
+allure {
+	version = '2.17.3'
+	autoconfigure = true
+	aspectjweaver = true
+}
+test {
+	useTestNG()
+
+	// Enable Allure integration for TestNG tests
+	systemProperty "allure.results.directory", "$buildDir/allure-results"
 }
 
