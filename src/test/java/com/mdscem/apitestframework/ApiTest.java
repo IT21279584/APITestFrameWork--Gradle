@@ -1,52 +1,52 @@
 package com.mdscem.apitestframework;
 
-import io.qameta.allure.Allure;
-import io.qameta.allure.Step;
-import io.restassured.RestAssured;
-import io.restassured.response.Response;
-import io.restassured.specification.RequestSpecification;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.mdscem.apitestframework.fileprocessor.filereader.FileConfigLoader;
+import com.mdscem.apitestframework.fileprocessor.filereader.TestCaseLoader;
+import com.mdscem.apitestframework.fileprocessor.filevalidator.JsonSchemaValidationWithJsonNode;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
-import static io.restassured.RestAssured.given;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 public class ApiTest {
 
+    private List<String> testCaseFiles;
+
+    @BeforeClass
+    public void setUp() throws Exception {
+        // Initialize the config loader and load the test case files before tests run
+        FileConfigLoader configLoader = new FileConfigLoader("/home/kmedagoda/Downloads/APITestFrameWork--Gradle/src/main/resources/fileconfig.json");
+
+        JsonNode testCaseFilesNode = configLoader.getTestCaseFiles();
+        testCaseFiles = new ArrayList<>();
+        if (testCaseFilesNode != null && testCaseFilesNode.isArray()) {
+            Iterator<JsonNode> elements = testCaseFilesNode.elements();
+            while (elements.hasNext()) {
+                testCaseFiles.add(elements.next().asText());
+            }
+        }
+    }
+
     @Test
-    public void testGetPost() {
-        logRequest("GET", "https://reqres.in/api/users/1");
+    public void runTestCases() {
+        // Iterate over the test case files and validate each one
+        for (String testCaseFile : testCaseFiles) {
+            TestCaseLoader testCaseLoader = new TestCaseLoader(testCaseFile);
+            JsonNode testCases = testCaseLoader.loadTestCases();
 
-        Response response = executeGetRequest("https://reqres.in/api/users/1");
-
-        validateStatusCode(response, 200);
-
-        attachResponseBodyToAllure(response);
-    }
-
-    @Step("Execute GET request to {url}")
-    public Response executeGetRequest(String url) {
-        return given()
-                .when()
-                .get(url)
-                .then()
-                .extract()
-                .response();
-    }
-
-    @Step("Log request: {method} {url}")
-    public void logRequest(String method, String url) {
-        Allure.addAttachment("Request Method", method);
-        Allure.addAttachment("Request URL", url);
-    }
-
-    @Step("Validate response status code: Expected = {expectedStatusCode}")
-    public void validateStatusCode(Response response, int expectedStatusCode) {
-        response.then().statusCode(expectedStatusCode);
-        Allure.addAttachment("Actual Status Code", String.valueOf(response.getStatusCode()));
-    }
-
-    @Step("Attach response body to Allure report")
-    public void attachResponseBodyToAllure(Response response) {
-        String responseBody = response.getBody().asString();
-        Allure.addAttachment("Response Body", responseBody);
+            if (testCases != null) {
+                System.out.println("Load Test case: " + testCases.toPrettyString());
+                try {
+                    JsonSchemaValidationWithJsonNode.validateFile(testCases);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            } else {
+                System.err.println("Failed to load test cases from file: " + testCaseFile);
+            }
+        }
     }
 }

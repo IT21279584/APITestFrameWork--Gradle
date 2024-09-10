@@ -23,12 +23,12 @@ ext {
 	junitJupiterVersion = '5.8.2'
 	allureVersion = '2.17.3'
 }
+
 dependencyManagement {
 	imports {
 		mavenBom "io.qameta.allure:allure-bom:${allureVersion}"
 	}
 }
-
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter'
@@ -39,38 +39,51 @@ dependencies {
 	implementation 'junit:junit:4.13.1'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-//	testImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
 	testImplementation 'org.testng:testng:7.4.0'
 	testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}"
 	testImplementation "org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}"
-
-
 	testImplementation 'io.qameta.allure:allure-testng:2.17.3'
 	implementation 'io.qameta.allure:allure-java-commons:2.17.3'
 	implementation 'io.qameta.allure:allure-testng:2.17.3'
 	implementation "io.rest-assured:rest-assured:${restAssuredVersion}"
 	implementation 'org.skyscreamer:jsonassert:1.5.1'
-
 	testImplementation 'io.qameta.allure:allure-rest-assured:2.15.0'
 	testImplementation 'io.qameta.allure:allure-junit4:2.15.0'
 	testImplementation 'io.qameta.allure:allure-testng:2.21.0'
-
 }
+
+def enableAllure = project.hasProperty('enableAllure') && project.property('enableAllure') == 'true'
 
 tasks.named('test') {
 	useTestNG()
 	useJUnitPlatform()
 	systemProperty 'surefire.testng.configs', 'testng.xml'
+
+	if (enableAllure) {
+		systemProperty "allure.results.directory", "$buildDir/allure-results"
+	} else {
+		logger.lifecycle("Allure reports are disabled, skipping Allure configuration.")
+	}
 }
+
 allure {
-	version = '2.17.3'
-	autoconfigure = true
-	aspectjweaver = true
+	if (enableAllure) {
+		version = '2.17.3'
+		autoconfigure = true
+		aspectjweaver = true
+		logger.lifecycle("Allure reports are enabled.")
+	} else {
+		logger.lifecycle("Allure reports are disabled in the allure configuration.")
+		autoconfigure = false
+	}
 }
+
 test {
 	useTestNG()
 
-	// Enable Allure integration for TestNG tests
-	systemProperty "allure.results.directory", "$buildDir/allure-results"
+	if (enableAllure) {
+		systemProperty "allure.results.directory", "$buildDir/allure-results"
+	} else {
+		logger.lifecycle("Skipping Allure report generation.")
+	}
 }
-

@@ -14,17 +14,18 @@ import java.util.Set;
 
 public class JsonSchemaValidationWithJsonNode {
 
-    public static void validateFile(JsonNode jsonNode) throws  IOException {
+    public static JsonNode validateFile(JsonNode jsonNode) throws  IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonSchemaFactory jsonSchemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
 
-        JsonNode schemaNode = objectMapper.readTree(new File("/home/hansakasudusinghe/Documents/APITestFrameWork/src/main/java/com/mdscem/apitestframework/fileprocessor/filevalidator/schema.json"));
+        JsonNode schemaNode = objectMapper.readTree(new File("/home/kmedagoda/Downloads/APITestFrameWork--Gradle/src/main/java/com/mdscem/apitestframework/fileprocessor/filevalidator/schema.json"));
         JsonSchema schema = jsonSchemaFactory.getSchema(schemaNode);
 
         Set<ValidationMessage> validationErrors = schema.validate(jsonNode);
 
         if (validationErrors.isEmpty()) {
             System.out.println("JSON is valid against the schema.");
+            return jsonNode;
         } else {
             System.out.println("JSON is not valid. Errors:");
             for (ValidationMessage error : validationErrors) {
