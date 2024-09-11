@@ -61,6 +61,7 @@ tasks.named('test') {
 	useTestNG()
 	useJUnitPlatform()
 	systemProperty 'surefire.testng.configs', 'testng.xml'
+	include '**/*Test*' // Make sure your pattern includes your test class names
 }
 allure {
 	version = '2.17.3'
