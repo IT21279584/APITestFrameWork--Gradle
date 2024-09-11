@@ -3,9 +3,11 @@
     "id": "1",
     "url": "https://reqres.in/api/users/1",
     "method": "GET",
-    "payload": null,
+    "payload": {},
     "expectedResponseCode": 200,
     "testName": "user_retrieve",
+    "priority" : 1,
+    "requiresAuthentication": true,
     "expectedResponseBody": {
       "data": {
         "id": 1,
