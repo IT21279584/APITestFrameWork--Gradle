@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.mdscem.apitestframework.constants.Constant.MULTIPLE_FILE_PATH;
+
 public class FileConfigLoader {
     private JsonNode config;
 
@@ -33,7 +35,7 @@ public class FileConfigLoader {
     }
 
     public static List<String> loadTestCasesFiles(){
-        FileConfigLoader configLoader = new FileConfigLoader("/home/hansakasudusinghe/Documents/APITestFrameWork--Gradle/src/main/resources/fileconfig.json");
+        FileConfigLoader configLoader = new FileConfigLoader(MULTIPLE_FILE_PATH);
 
         JsonNode testCaseFilesNode = configLoader.getTestCaseFiles();
         List<String> testCaseFiles = new ArrayList<>();
