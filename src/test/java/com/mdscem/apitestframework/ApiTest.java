@@ -1,52 +1,84 @@
 package com.mdscem.apitestframework;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.mdscem.apitestframework.fileprocessor.fileinterpreter.FileInterpreter;
 import com.mdscem.apitestframework.fileprocessor.filereader.FileConfigLoader;
+import com.mdscem.apitestframework.fileprocessor.filereader.TestCase;
 import com.mdscem.apitestframework.fileprocessor.filereader.TestCaseLoader;
 import com.mdscem.apitestframework.fileprocessor.filevalidator.JsonSchemaValidationWithJsonNode;
+import com.mdscem.apitestframework.requestprocessor.CoreFramework;
+import com.mdscem.apitestframework.requestprocessor.FrameworkConfigLoader;
+import com.mdscem.apitestframework.requestprocessor.KarateCoreFramework;
+import com.mdscem.apitestframework.requestprocessor.RestAssuredCoreFramework;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
 public class ApiTest {
 
-    private List<String> testCaseFiles;
+    private List<TestCase> testCaseList = new ArrayList<>();
+    private CoreFramework coreFramework;
 
     @BeforeClass
     public void setUp() throws Exception {
-        // Initialize the config loader and load the test case files before tests run
-        FileConfigLoader configLoader = new FileConfigLoader("/home/kmedagoda/Downloads/APITestFrameWork--Gradle/src/main/resources/fileconfig.json");
+        // Load framework from config
+        coreFramework = loadFrameworkFromConfig();
 
-        JsonNode testCaseFilesNode = configLoader.getTestCaseFiles();
-        testCaseFiles = new ArrayList<>();
-        if (testCaseFilesNode != null && testCaseFilesNode.isArray()) {
-            Iterator<JsonNode> elements = testCaseFilesNode.elements();
-            while (elements.hasNext()) {
-                testCaseFiles.add(elements.next().asText());
+        // Load and validate test cases
+        loadAndValidateTestCases();
+    }
+
+    private CoreFramework loadFrameworkFromConfig() throws IOException {
+        String frameworkType = FrameworkConfigLoader.loadFrameworkTypeFromConfig();
+        switch (frameworkType.toLowerCase()) {
+            case "restassured":
+                return new RestAssuredCoreFramework();
+            case "karate":
+                return new KarateCoreFramework();
+            default:
+                throw new IllegalArgumentException("Unsupported framework type: " + frameworkType);
+        }
+    }
+
+    private void loadAndValidateTestCases() throws Exception {
+        FileConfigLoader configLoader = new FileConfigLoader("/home/kmedagoda/Downloads/APITestFrameWork--Gradle/src/main/resources/fileconfig.json");
+        List<String> testCaseFiles = extractTestCaseFiles(configLoader.getTestCaseFiles());
+
+        for (String testCaseFile : testCaseFiles) {
+            JsonNode testCases = new TestCaseLoader(testCaseFile).loadTestCases();
+            if (testCases != null) {
+                try {
+                    JsonSchemaValidationWithJsonNode.validateFile(testCases);
+                    testCaseList.addAll(FileInterpreter.interpret(testCases)); // Store validated test cases
+                } catch (IOException e) {
+                    System.err.println("Validation error for " + testCaseFile + ": " + e.getMessage());
+                }
             }
         }
     }
 
+    private List<String> extractTestCaseFiles(JsonNode testCaseFilesNode) {
+        List<String> testCaseFiles = new ArrayList<>();
+        if (testCaseFilesNode != null && testCaseFilesNode.isArray()) {
+            Iterator<JsonNode> elements = testCaseFilesNode.elements();
+            elements.forEachRemaining(node -> testCaseFiles.add(node.asText()));
+        }
+        return testCaseFiles;
+    }
+
     @Test
     public void runTestCases() {
-        // Iterate over the test case files and validate each one
-        for (String testCaseFile : testCaseFiles) {
-            TestCaseLoader testCaseLoader = new TestCaseLoader(testCaseFile);
-            JsonNode testCases = testCaseLoader.loadTestCases();
+        if (testCaseList.isEmpty()) {
+            System.err.println("No valid test cases available to run.");
+            return;
+        }
 
-            if (testCases != null) {
-                System.out.println("Load Test case: " + testCases.toPrettyString());
-                try {
-                    JsonSchemaValidationWithJsonNode.validateFile(testCases);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            } else {
-                System.err.println("Failed to load test cases from file: " + testCaseFile);
-            }
+        for (TestCase testCase : testCaseList) {
+            coreFramework.executeTestCase(testCase);  // Use CoreFramework interface
         }
     }
 }
