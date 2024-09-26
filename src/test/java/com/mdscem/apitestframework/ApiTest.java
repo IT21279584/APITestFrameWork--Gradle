@@ -7,10 +7,9 @@ import com.mdscem.apitestframework.fileprocessor.filereader.TestCase;
 import com.mdscem.apitestframework.fileprocessor.filereader.TestCaseLoader;
 import com.mdscem.apitestframework.fileprocessor.filevalidator.JsonSchemaValidationWithJsonNode;
 import com.mdscem.apitestframework.requestprocessor.CoreFramework;
-import com.mdscem.apitestframework.requestprocessor.FrameworkConfigLoader;
-import com.mdscem.apitestframework.requestprocessor.KarateCoreFramework;
-import com.mdscem.apitestframework.requestprocessor.RestAssuredCoreFramework;
+import com.mdscem.apitestframework.requestprocessor.FrameworkAdapter;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
 
 import java.io.IOException;
@@ -33,7 +32,7 @@ public class ApiTest {
     }
 
     private CoreFramework loadFrameworkFromConfig() throws IOException {
-        String frameworkType = FrameworkConfigLoader.loadFrameworkTypeFromConfig();
+        String frameworkType = FrameworkAdapter.loadFrameworkTypeFromConfig();
         switch (frameworkType.toLowerCase()) {
             case "restassured":
                 return new RestAssuredCoreFramework();
@@ -53,7 +52,7 @@ public class ApiTest {
             if (testCases != null) {
                 try {
                     JsonSchemaValidationWithJsonNode.validateFile(testCases);
-                    testCaseList.addAll(FileInterpreter.interpret(testCases)); // Store validated test cases
+                    testCaseList.addAll(FileInterpreter.interpret(testCases));
                 } catch (IOException e) {
                     System.err.println("Validation error for " + testCaseFile + ": " + e.getMessage());
                 }
@@ -70,7 +69,7 @@ public class ApiTest {
         return testCaseFiles;
     }
 
-    @Test
+        @Test
     public void runTestCases() {
         if (testCaseList.isEmpty()) {
             System.err.println("No valid test cases available to run.");
@@ -81,4 +80,20 @@ public class ApiTest {
             coreFramework.executeTestCase(testCase);  // Use CoreFramework interface
         }
     }
+
+//    @Factory
+//    public Object[] createTests() {
+//        if (testCaseList.isEmpty()) {
+//            System.err.println("No valid test cases available to run.");
+//            return new Object[0];
+//        }
+//
+//        Object[] testMethods = new Object[testCaseList.size()];
+//
+//        for (int i = 0; i < testCaseList.size(); i++) {
+//            testMethods[i] = new TestCaseRunner(testCaseList.get(i), coreFramework);
+//        }
+//
+//        return testMethods;
+//    }
 }
