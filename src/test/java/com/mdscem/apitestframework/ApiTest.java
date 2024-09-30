@@ -3,52 +3,31 @@ package com.mdscem.apitestframework;
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.mdscem.apitestframework.fileprocessor.fileinterpreter.FileInterpreter;
-import com.mdscem.apitestframework.fileprocessor.filereader.FileConfigLoader;
 import com.mdscem.apitestframework.fileprocessor.filereader.TestCase;
-import com.mdscem.apitestframework.fileprocessor.filereader.TestCaseLoader;
-import com.mdscem.apitestframework.fileprocessor.filevalidator.JsonSchemaValidationWithJsonNode;
+import com.mdscem.apitestframework.frameworkconfig.FrameworkLoader;
 import com.mdscem.apitestframework.requestprocessor.CoreFramework;
-import com.mdscem.apitestframework.requestprocessor.FrameworkAdapter;
-import org.testng.annotations.BeforeSuite;
-import org.testng.annotations.Factory;
+import com.mdscem.apitestframework.validatetestcase.ValidateTestCase;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.function.Executable;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ApiTest {
 
     private static ExtentReports extent;
     private static ExtentTest test;
-    private List<TestCase> testCaseList = new ArrayList<>();
-    private CoreFramework coreFramework;
+    private static List<TestCase> testCaseList = new ArrayList<>();
+    private static CoreFramework coreFramework;
 
-    // Load the test cases in the constructor or early
-    public ApiTest() throws Exception {
-        beforeSuite();
-    }
 
-    @Factory
-    public Object[] createTests() {
-        // If the test case list is not updated by now, log an error.
-        if (testCaseList.isEmpty()) {
-            System.err.println("No valid test cases available to run.");
-            return new Object[0];
-        }
 
-        Object[] testMethods = new Object[testCaseList.size()];
-        for (int i = 0; i < testCaseList.size(); i++) {
-            testMethods[i] = new TestCaseRunner(testCaseList.get(i), coreFramework);
-        }
-
-        return testMethods;
-    }
-
-    public void beforeSuite() throws Exception {
-        // Initialize reporting
+    @BeforeAll
+    public static void beforeAll() throws Exception {
         ExtentSparkReporter spark = new ExtentSparkReporter("build/Extent.html");
         spark.config().setReportName("API Test Report");
         spark.config().setDocumentTitle("Test Execution Report");
@@ -56,70 +35,40 @@ public class ApiTest {
         extent.attachReporter(spark);
         logSystemInfo();
 
-        // Load framework
-        coreFramework = loadFrameworkFromConfig();
+        FrameworkLoader frameworkLoader = new FrameworkLoader();
+        coreFramework = frameworkLoader.loadFrameworkFromConfig();
 
-        // Load and validate test cases
-        loadAndValidateTestCases();
+        ValidateTestCase validateTestCase = new ValidateTestCase();
+        validateTestCase.loadAndValidateTestCases(testCaseList);
 
-        // Log the final size of the test case list
         System.out.println("Final number of test cases loaded: " + testCaseList.size());
     }
 
-    private CoreFramework loadFrameworkFromConfig() throws IOException {
-        String frameworkType = FrameworkAdapter.loadFrameworkTypeFromConfig();
-        System.out.println("Framework loaded from config: " + frameworkType);
-
-        switch (frameworkType.toLowerCase()) {
-            case "restassured":
-                return new RestAssuredCoreFramework();
-            case "karate":
-                return new KarateCoreFramework();
-            default:
-                throw new IllegalArgumentException("Unsupported framework type: " + frameworkType);
+    @TestFactory
+    public Stream<DynamicTest> createTests() {
+        if (testCaseList.isEmpty()) {
+            System.err.println("No valid test cases available to run.");
+            return Stream.empty();
         }
+
+        return testCaseList.stream().map(this::createDynamicTest);
     }
 
-    private void loadAndValidateTestCases() throws Exception {
-        FileConfigLoader configLoader = new FileConfigLoader("/home/kmedagoda/Documents/Kavinda Final/APITestFrameWork--Gradle/src/main/resources/fileconfig.json");
+    private DynamicTest createDynamicTest(TestCase testCase) {
+        return DynamicTest.dynamicTest(testCase.getTestName(), () -> {
+            try {
+                test = extent.createTest(testCase.getTestName());
 
-        // Log test case files
-        System.out.println("Loading test case files from config...");
-        List<String> testCaseFiles = extractTestCaseFiles(configLoader.getTestCaseFiles());
-        System.out.println("Test case files found: " + testCaseFiles);
+                TestCaseRunner runner = new TestCaseRunner(testCase, coreFramework);
+                runner.runTestCase();
 
-        // Load each test case file
-        for (String testCaseFile : testCaseFiles) {
-            System.out.println("Loading test case file: " + testCaseFile);
+                test.pass("Test passed successfully");
 
-            JsonNode testCases = new TestCaseLoader(testCaseFile).loadTestCases();
-
-            if (testCases != null) {
-                System.out.println("Test cases loaded successfully from file: " + testCaseFile);
-                try {
-                    JsonSchemaValidationWithJsonNode.validateFile(testCases);
-                    System.out.println("Schema validation passed for file: " + testCaseFile);
-                    List<TestCase> interpretedTestCases = FileInterpreter.interpret(testCases);
-                    testCaseList.addAll(interpretedTestCases);
-
-                    // Log how many test cases were added
-                    System.out.println("Added " + interpretedTestCases.size() + " test cases from " + testCaseFile);
-                } catch (IOException e) {
-                    System.err.println("Validation error for " + testCaseFile + ": " + e.getMessage());
-                }
-            } else {
-                System.err.println("No test cases found in file: " + testCaseFile);
+            } catch (AssertionError | Exception e) {
+                test.fail("Test failed: " + e.getMessage());
+                throw e;
             }
-        }
-    }
-
-    private List<String> extractTestCaseFiles(JsonNode testCaseFilesNode) {
-        List<String> testCaseFiles = new ArrayList<>();
-        if (testCaseFilesNode != null && testCaseFilesNode.isArray()) {
-            Iterator<JsonNode> elements = testCaseFilesNode.elements();
-            elements.forEachRemaining(node -> testCaseFiles.add(node.asText()));
-        }
-        return testCaseFiles;
+        });
     }
 
     private static void logSystemInfo() {
