@@ -13,8 +13,8 @@ import com.mdscem.apitestframework.requestprocessor.CoreFramework;
 import com.mdscem.apitestframework.requestprocessor.FrameworkAdapter;
 import org.junit.jupiter.api.BeforeAll;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Factory;
-import org.testng.annotations.Test;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,40 +24,19 @@ import java.util.List;
 public class ApiTest {
     private static ExtentReports extent;
     private static ExtentTest test;
-    @BeforeAll
-    public static void setup() {
-        ExtentSparkReporter spark = new ExtentSparkReporter("build/Extent.html");
-        spark.config().setReportName("API Test Report");
-        spark.config().setDocumentTitle("Test Execution Report");
-        extent = new ExtentReports();
-        extent.attachReporter(spark);
-        logSystemInfo();
-    }
 
-    private static void logSystemInfo() {
-        String javaVersion = System.getProperty("java.version");
-        String osName = System.getProperty("os.name");
-        String osVersion = System.getProperty("os.version");
-        extent.setSystemInfo("Java Version", javaVersion);
-        extent.setSystemInfo("OS", osName);
-        extent.setSystemInfo("OS Version", osVersion);
-    }
 
-    private void initializeTest(String testName, String author) {
-        test = extent.createTest(testName);
-        test.assignAuthor(author);
-    }
 
     private List<TestCase> testCaseList = new ArrayList<>();
     private CoreFramework coreFramework;
 
-    @BeforeClass
+    @BeforeSuite
     public void setUp() throws Exception {
         // Load framework from config
         coreFramework = loadFrameworkFromConfig();
 
         // Load and validate test cases
-        loadAndValidateTestCases();
+        testCaseList = loadAndValidateTestCases();
     }
 
     private CoreFramework loadFrameworkFromConfig() throws IOException {
@@ -72,7 +51,7 @@ public class ApiTest {
         }
     }
 
-    private void loadAndValidateTestCases() throws Exception {
+    private List<TestCase> loadAndValidateTestCases() throws Exception {
         FileConfigLoader configLoader = new FileConfigLoader("/home/hansakasudusinghe/Documents/APITestFrameWork--Gradle/src/main/resources/fileconfig.json");
         List<String> testCaseFiles = extractTestCaseFiles(configLoader.getTestCaseFiles());
 
@@ -82,11 +61,13 @@ public class ApiTest {
                 try {
                     JsonSchemaValidationWithJsonNode.validateFile(testCases);
                     testCaseList.addAll(FileInterpreter.interpret(testCases));
+                    return testCaseList;
                 } catch (IOException e) {
                     System.err.println("Validation error for " + testCaseFile + ": " + e.getMessage());
                 }
             }
         }
+        return testCaseList;
     }
 
     private List<String> extractTestCaseFiles(JsonNode testCaseFilesNode) {
@@ -112,6 +93,8 @@ public class ApiTest {
 
     @Factory
     public Object[] createTests() {
+
+        System.out.println("Creating test cases...");
         if (testCaseList.isEmpty()) {
             System.err.println("No valid test cases available to run.");
             return new Object[0];
@@ -119,10 +102,18 @@ public class ApiTest {
 
         Object[] testMethods = new Object[testCaseList.size()];
 
-        for (int i = 0; i < testCaseList.size(); i++) {
-            testMethods[i] = new TestCaseRunner(testCaseList.get(i), coreFramework);
-        }
+        try{
+            for (int i = 0; i < testCaseList.size(); i++) {
+                System.out.println("Creating test case for: " + testCaseList.get(i));
+                testMethods[i] = new TestCaseRunner(testCaseList.get(i), coreFramework);
 
-        return testMethods;
+                return testMethods;
+            }
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return null;
+
     }
+
 }

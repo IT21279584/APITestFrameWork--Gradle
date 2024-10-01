@@ -88,6 +88,9 @@ test {
 		events "passed", "skipped", "failed"
 	}
 
+	// Pass the 'edit' property from Gradle to the JVM
+
+
 	// Set test outputs to be retained for viewing
 	reports {
 		junitXml.enabled = true // Enable XML report generation
@@ -98,6 +101,13 @@ test {
 	systemProperty "allure.results.directory", "$buildDir/allure-results"
 	useJUnitPlatform()  // Enable JUnit 5
 //	finalizedBy jacocoTestReport, jacocoTestCoverageVerification // Run coverage verification
+
+	if (project.hasProperty('edit')) {
+		println "Property 'edit' found with value: ${project.property('edit')}"
+	} else {
+		println "Property 'edit' not found"
+	}
+
 }
 //// Configure JaCoCo for test coverage
 //jacoco {
@@ -137,3 +147,4 @@ task printJavaVersion {
 		println "Java Version: " + System.getProperty("java.version")
 	}
 }
+

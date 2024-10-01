@@ -11,7 +11,7 @@ public class FrameworkAdapter {
     public static String loadFrameworkTypeFromConfig() throws IOException {
         // Load the JSON configuration file
         ObjectMapper objectMapper = new ObjectMapper();
-        File configFile = new File("src/main/resources/framework-config.json");
+        File configFile = new File("/home/hansakasudusinghe/Documents/APITestFrameWork--Gradle/src/main/resources/framework-config.json");
 
         if (!configFile.exists()) {
             throw new IOException("Configuration file not found: " + configFile.getAbsolutePath());
