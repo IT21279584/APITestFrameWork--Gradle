@@ -12,9 +12,11 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.mdscem.apitestframework.constants.Constant.MULTIPLE_FILE_PATH;
+
 public class ValidateTestCase {
     public void loadAndValidateTestCases(List<TestCase> testCaseList) throws Exception {
-        FileConfigLoader configLoader = new FileConfigLoader("/home/kmedagoda/Documents/Kavinda Final/APITestFrameWork--Gradle/src/main/resources/fileconfig.json");
+        FileConfigLoader configLoader = new FileConfigLoader(MULTIPLE_FILE_PATH);
 
         // Log test case files
         List<String> testCaseFiles = extractTestCaseFiles(configLoader.getTestCaseFiles());
