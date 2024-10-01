@@ -1,4 +1,4 @@
-package com.mdscem.apitestframework;
+package com.mdscem.apitestframework.frameworkImplementations;
 
 import com.mdscem.apitestframework.fileprocessor.filereader.TestCase;
 import com.mdscem.apitestframework.requestprocessor.CoreFramework;

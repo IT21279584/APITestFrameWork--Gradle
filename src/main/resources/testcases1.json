@@ -5,7 +5,7 @@
     "method": "GET",
     "payload": {},
     "expectedResponseCode": 200,
-    "testName": "user_retrieve",
+    "testName": "user_1_retrieve",
     "priority" : 1,
     "requiresAuthentication": true,
     "expectedResponseBody": {
