@@ -5,7 +5,7 @@
     "method": "GET",
     "payload": {},
     "expectedResponseCode": 200,
-    "testName": "user_retrieve",
+    "testName": "user_1_retrieve",
     "priority" : 1,
     "requiresAuthentication": true,
     "expectedResponseBody": {
@@ -24,7 +24,7 @@
   },
   {
     "id": "1",
-    "url": "https://reqres.in/api/users/1",
+    "url": "https://reqres.in/api/users/12",
     "method": "GET",
     "payload": {},
     "expectedResponseCode": 200,
@@ -33,11 +33,11 @@
     "requiresAuthentication": true,
     "expectedResponseBody": {
       "data": {
-        "id": 1,
-        "email": "george.bluth@reqres.in",
-        "first_name": "George",
-        "last_name": "Bluth",
-        "avatar": "https://reqres.in/img/faces/1-image.jpg"
+        "id": 12,
+        "email": "rachel.howell@reqres.in",
+        "first_name": "Rachel",
+        "last_name": "Howell",
+        "avatar": "https://reqres.in/img/faces/12-image.jpg"
       },
       "support": {
         "url": "https://reqres.in/#support-heading",

@@ -4,9 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.mdscem.apitestframework.fileprocessor.filereader.TestCase;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 public class FileInterpreter {
 
@@ -33,6 +31,7 @@ public class FileInterpreter {
 
                     //Action Execution: Add the test case to the list
                     testCases.add(testCase);
+
                 } catch (Exception e) {
                     System.err.println("Error while interpreting test case: " + e.getMessage());
                 }
@@ -41,7 +40,6 @@ public class FileInterpreter {
             System.err.println("The validated JSON is not an array of test cases.");
         }
         System.out.println(testCases);
-
         return testCases;
     }
 }

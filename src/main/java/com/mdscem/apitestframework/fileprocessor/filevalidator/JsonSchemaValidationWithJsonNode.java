@@ -12,13 +12,17 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
+import static com.mdscem.apitestframework.constants.Constant.FILE_VALIDATOR_PATH;
+
 public class JsonSchemaValidationWithJsonNode {
 
     public static JsonNode validateFile(JsonNode jsonNode) throws  IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonSchemaFactory jsonSchemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
 
-        JsonNode schemaNode = objectMapper.readTree(new File("/home/kmedagoda/Downloads/APITestFrameWork--Gradle/src/main/java/com/mdscem/apitestframework/fileprocessor/filevalidator/schema.json"));
+
+        JsonNode schemaNode = objectMapper.readTree(new File(FILE_VALIDATOR_PATH));
+
         JsonSchema schema = jsonSchemaFactory.getSchema(schemaNode);
 
         Set<ValidationMessage> validationErrors = schema.validate(jsonNode);

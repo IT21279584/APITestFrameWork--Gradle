@@ -3,7 +3,8 @@ plugins {
 	id 'org.springframework.boot' version '2.7.0'
 	id 'io.spring.dependency-management' version '1.1.6'
 	id 'io.qameta.allure' version '2.11.2'
-// id 'jacoco' // Add the JaCoCo plugin for code coverage
+//	id 'jacoco' // Add the JaCoCo plugin for code coverage
+
 }
 
 group = 'com.mdscem'
@@ -76,11 +77,13 @@ test {
 	// Use TestNG for testing
 	useTestNG() {
 		// This is to ensure that TestNG runs and generates reports
-//    options {
-//       listeners << 'org.testng.reporters.XMLReporter'
-		useDefaultListeners = true
+
+//		options {
+//			listeners << 'org.testng.reporters.XMLReporter'
+			useDefaultListeners = true
 		suites 'src/test/resources/testng.xml'  // Point to your TestNG XML file
-//    }
+//		}
+
 	}
 
 	// Enable logging of passed, skipped, and failed events
@@ -131,9 +134,12 @@ test {
 //       }
 //    }
 // }
+
 //}
 task printJavaVersion {
 	doLast {
 		println "Java Version: " + System.getProperty("java.version")
 	}
+
 }
+
