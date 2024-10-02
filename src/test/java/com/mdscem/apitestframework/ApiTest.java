@@ -1,5 +1,6 @@
 package com.mdscem.apitestframework;
 
+
 import com.aventstack.extentreports.ExtentReports;
 import com.aventstack.extentreports.ExtentTest;
 import com.aventstack.extentreports.reporter.ExtentSparkReporter;
@@ -79,5 +80,6 @@ public class ApiTest {
         extent.setSystemInfo("OS", osName);
         extent.setSystemInfo("OS Version", osVersion);
         System.out.println("System Info: Java Version - " + javaVersion + ", OS - " + osName + ", OS Version - " + osVersion);
+
     }
-}
+

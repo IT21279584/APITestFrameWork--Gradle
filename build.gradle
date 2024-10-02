@@ -4,6 +4,7 @@ plugins {
 	id 'io.spring.dependency-management' version '1.1.6'
 	id 'io.qameta.allure' version '2.11.2'
 //	id 'jacoco' // Add the JaCoCo plugin for code coverage
+
 }
 
 group = 'com.mdscem'
@@ -40,7 +41,7 @@ dependencies {
 	implementation 'junit:junit:4.13.1'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-//	testImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
+// testImplementation "io.rest-assured:rest-assured:${restAssuredVersion}"
 	testImplementation 'org.testng:testng:7.4.0'
 	testImplementation "org.junit.jupiter:junit-jupiter-api:${junitJupiterVersion}"
 	testImplementation "org.junit.jupiter:junit-jupiter-engine:${junitJupiterVersion}"
@@ -76,11 +77,13 @@ test {
 	// Use TestNG for testing
 	useTestNG() {
 		// This is to ensure that TestNG runs and generates reports
+
 //		options {
 //			listeners << 'org.testng.reporters.XMLReporter'
 			useDefaultListeners = true
 		suites 'src/test/resources/testng.xml'  // Point to your TestNG XML file
 //		}
+
 	}
 
 	// Enable logging of passed, skipped, and failed events
@@ -97,43 +100,46 @@ test {
 	// Enable Allure integration for TestNG tests
 	systemProperty "allure.results.directory", "$buildDir/allure-results"
 	useJUnitPlatform()  // Enable JUnit 5
-//	finalizedBy jacocoTestReport, jacocoTestCoverageVerification // Run coverage verification
+// finalizedBy jacocoTestReport, jacocoTestCoverageVerification // Run coverage verification
 }
 //// Configure JaCoCo for test coverage
 //jacoco {
-//	toolVersion = "0.8.8"  // Latest JaCoCo version
+// toolVersion = "0.8.8"  // Latest JaCoCo version
 //}
 //// Configure the JaCoCo report task
 //jacocoTestReport {
-//	reports {
-//		xml.required = true  // Enable XML report generation
-//		csv.required = false // Disable CSV report generation
-//		html.outputLocation = layout.buildDirectory.dir('jacocoHtml')  // Set output location for HTML reports
-//	}
+// reports {
+//    xml.required = true  // Enable XML report generation
+//    csv.required = false // Disable CSV report generation
+//    html.outputLocation = layout.buildDirectory.dir('jacocoHtml')  // Set output location for HTML reports
+// }
 //}
 
 //jacocoTestCoverageVerification {
-//	violationRules {
-//		rule {
-//			// Apply to all classes
-//			element = 'CLASS'
-//			limit {
-//				counter = 'INSTRUCTION'
-//				value = 'COVEREDRATIO'
-//			}
-//			limit {
-//				counter = 'BRANCH'
-//				value = 'COVEREDRATIO'
-//			}
-//			limit {
-//				counter = 'LINE'
-//				value = 'COVEREDRATIO'
-//			}
-//		}
-//	}
+// violationRules {
+//    rule {
+//       // Apply to all classes
+//       element = 'CLASS'
+//       limit {
+//          counter = 'INSTRUCTION'
+//          value = 'COVEREDRATIO'
+//       }
+//       limit {
+//          counter = 'BRANCH'
+//          value = 'COVEREDRATIO'
+//       }
+//       limit {
+//          counter = 'LINE'
+//          value = 'COVEREDRATIO'
+//       }
+//    }
+// }
+
 //}
 task printJavaVersion {
 	doLast {
 		println "Java Version: " + System.getProperty("java.version")
 	}
+
 }
+

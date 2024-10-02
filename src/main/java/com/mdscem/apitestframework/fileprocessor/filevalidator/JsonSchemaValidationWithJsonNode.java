@@ -20,7 +20,9 @@ public class JsonSchemaValidationWithJsonNode {
         ObjectMapper objectMapper = new ObjectMapper();
         JsonSchemaFactory jsonSchemaFactory = JsonSchemaFactory.getInstance(SpecVersion.VersionFlag.V7);
 
+
         JsonNode schemaNode = objectMapper.readTree(new File(FILE_VALIDATOR_PATH));
+
         JsonSchema schema = jsonSchemaFactory.getSchema(schemaNode);
 
         Set<ValidationMessage> validationErrors = schema.validate(jsonNode);
